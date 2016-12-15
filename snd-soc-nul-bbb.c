@@ -25,7 +25,7 @@ struct snd_soc_card_drvdata_nul_bbb {
 	unsigned sysclk;
 };
 
-static int startup(struct snd_pcm_substream *substream)
+static int startup(struct snd_pcm_substream *const substream)
 {
 	struct snd_soc_pcm_runtime *const rtd = substream->private_data;
 	struct snd_soc_card *const soc_card = rtd->card;
@@ -55,30 +55,24 @@ static int hw_params(struct snd_pcm_substream *const substream,
 	struct snd_soc_pcm_runtime *const rtd = substream->private_data;
 	struct snd_soc_dai *const cpu_dai = rtd->cpu_dai;
 	struct snd_soc_card *const soc_card = rtd->card;
-	int ret = 0;
 	unsigned const sysclk = ((struct snd_soc_card_drvdata_nul_bbb *)
 			   snd_soc_card_get_drvdata(soc_card))->sysclk;
 
 	/* set the CPU system clock */
 	/* SND_SOC_CLOCK_IN means get clock from Y4 (24.576 MHz) */
 	/* SND_SOC_CLOCK_OUT means emit 24.000 MHz clock */
-	ret = snd_soc_dai_set_sysclk(cpu_dai, 0, sysclk, SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		return ret;
+	return snd_soc_dai_set_sysclk(cpu_dai, 0, sysclk, SND_SOC_CLOCK_IN);
 
-	return 0;
 }
-
-static struct snd_soc_ops ops = {
-	.startup = startup,
-	.shutdown = shutdown,
-	.hw_params = hw_params,
-};
 
 static struct snd_soc_dai_link dai_nul_bbb = {
 	.name		= "NUL BBB",
 	.stream_name	= "Playback",
-	.ops            = &ops,
+	.ops		= {
+		.startup	= startup,
+		.shutdown	= shutdown,
+		.hw_params	= hw_params,
+	},
 	.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_CBS_CFS |
 		   SND_SOC_DAIFMT_NB_NF,
 };
@@ -116,7 +110,7 @@ static int nul_bbb_probe(struct platform_device *const pdev)
 
 	struct snd_soc_dai_link_component *const codecs = devm_kzalloc(
 		dev,
-		num_codecs * sizeof (struct snd_soc_dai_link_component),
+		num_codecs * sizeof(struct snd_soc_dai_link_component),
 		GFP_KERNEL
 	);
 
