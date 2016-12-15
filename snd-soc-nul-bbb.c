@@ -65,22 +65,40 @@ static int hw_params(struct snd_pcm_substream *const substream,
 
 }
 
-static struct snd_soc_dai_link dai_nul_bbb = {
+static const struct snd_soc_ops ops = {
+	.startup	= startup,
+	.shutdown	= shutdown,
+	.hw_params	= hw_params,
+};
+
+static struct snd_soc_dai_link dai_nul_bbb_purple = {
 	.name		= "NUL BBB",
 	.stream_name	= "Playback",
-	.ops		= {
-		.startup	= startup,
-		.shutdown	= shutdown,
-		.hw_params	= hw_params,
-	},
+	.ops		= &ops,
 	.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_CBS_CFS |
 		   SND_SOC_DAIFMT_NB_NF,
+};
+
+static struct snd_soc_dai_link dai_nul_bbb_yellow = {
+	.name		= "NUL BBB",
+	.stream_name	= "Playback",
+	.ops		= &ops,
+	.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_CBS_CFS |
+		   SND_SOC_DAIFMT_NB_IF,
 };
 
 static const struct of_device_id nul_bbb_dt_ids[] = {
 	{
 		.compatible = PREFIX "audio",
-		.data = (void *) &dai_nul_bbb,
+		.data = (void *) &dai_nul_bbb_purple,
+	},
+	{
+		.compatible = PREFIX "audio-purple",
+		.data = (void *) &dai_nul_bbb_purple,
+	},
+	{
+		.compatible = PREFIX "audio-yellow",
+		.data = (void *) &dai_nul_bbb_yellow,
 	},
 	{ /* sentinel */ }
 };
